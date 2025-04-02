@@ -137,13 +137,30 @@ class DesktopIconManagerGUI:
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
         
+        # 标题框架
+        title_frame = ttk.Frame(main_frame)
+        title_frame.pack(pady=3)
+        
         # 标题
         title_label = ttk.Label(
-            main_frame, 
-            text="桌面图标管理工具", 
+            title_frame, 
+            text="简易开源的桌面图标管理工具", 
             font=("微软雅黑", 10, "bold")
         )
-        title_label.pack(pady=3)
+        title_label.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # GitHub链接按钮
+        def open_github():
+            import webbrowser
+            webbrowser.open("https://github.com/jbk3311/DesktopIcon")
+            
+        github_button = ttk.Button(
+            title_frame,
+            text="项目已在github开源",
+            command=open_github,
+            width=18
+        )
+        github_button.pack(side=tk.LEFT)
         
         # 按钮框架
         button_frame = ttk.Frame(main_frame)
@@ -230,7 +247,7 @@ class DesktopIconManagerGUI:
         """显示使用说明"""
         help_text = """使用说明：
 
-1. 使用说明：
+1. 按钮功能：
    - 隐藏选中：将选中的图标设为隐藏状态
    - 显示选中：将选中的图标恢复显示状态
    - 刷新列表：更新图标列表显示
@@ -240,7 +257,10 @@ class DesktopIconManagerGUI:
    - 修改后可能需要刷新才能看到效果
    - 建议定期备份重要文件
 
-
+3. 本程序已在github开源
+    - 欢迎访问提交issue
+    - 开源地址：https://github.com/jbk3311/DesktopIcon
+    - 如果觉得不错，给个star支持一下
 """
         
         # 创建说明窗口

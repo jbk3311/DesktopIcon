@@ -1,3 +1,7 @@
+[中文文档](README.md) | English 
+
+---
+
 # Desktop Icon Manager
 
 A tool for managing Windows desktop icons, helping you easily control the display and hiding of desktop icons, with the ability to restore icons to their original positions when toggling visibility.
@@ -50,7 +54,3 @@ This project is licensed under the GNU License - see the [LICENSE](LICENSE) file
 ## Contributing
 
 Issues and Pull Requests are welcome to help improve this project.
-
----
-
-[中文文档](README.md) | English 

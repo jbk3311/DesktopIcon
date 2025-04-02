@@ -6,7 +6,7 @@
 APP_NAME = "桌面图标管理器"
 APP_VERSION = "1.0.0"
 APP_AUTHOR = "meitool.cn"
-APP_COPYRIGHT = "Copyright © 2024"
+APP_COPYRIGHT = "Copyright (c) 2024"
 APP_DESCRIPTION = "一个用于管理Windows桌面图标的工具"
 
 # 调试模式

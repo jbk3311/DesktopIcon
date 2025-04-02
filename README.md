@@ -1,3 +1,7 @@
+中文 | [English](README_EN.md)
+
+---
+
 # Desktop Icon Manager
 
 一个用于管理 Windows 桌面图标的工具，可以帮助你轻松地控制桌面图标的显示、隐藏，操作显示与隐藏时可还原回图标原来的位置。
@@ -51,6 +55,4 @@
 
 欢迎提交 Issue 和 Pull Request 来帮助改进这个项目。
 
----
 
-中文 | [English](README_EN.md)

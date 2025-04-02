@@ -43,7 +43,7 @@ def build_exe():
             "--remove-output",               # 移除中间文件
 
             f"--company-name={APP_AUTHOR}",           # 公司名称
-            f"--product-name={APP_NAME}",         # 产品名称
+            f"--product-name=DesktopIconManager",         # 产品名称
             f"--product-version={APP_VERSION}",            # 产品版本
             f"--file-version={APP_VERSION}",               # 文件版本
             f"--file-description={APP_DESCRIPTION}",   # 文件描述
