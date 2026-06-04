@@ -1,7 +1,25 @@
 import os
 import subprocess
 import shutil
+import sys
+import importlib.util
 from src.config import APP_NAME, APP_VERSION, APP_AUTHOR, APP_COPYRIGHT, APP_DESCRIPTION
+
+
+def check_build_environment():
+    """检查当前 Python 是否具备打包环境"""
+    print(f"当前 Python: {sys.executable}")
+
+    if importlib.util.find_spec("nuitka") is None:
+        print("\n错误: 当前 Python 未安装 Nuitka。")
+        print("请先为【同一个】Python 安装依赖，例如：")
+        print(f'  "{sys.executable}" -m pip install -r requirements.txt')
+        print("\n若系统存在多个 Python，请确认 PATH 中的 python 与 pip 指向同一安装，")
+        print("或直接使用指定解释器打包，例如：")
+        print('  py -3.10 build.py')
+        return False
+
+    return True
 
 def clean_build():
     """清理旧的构建文件"""
@@ -21,13 +39,16 @@ def clean_build():
 
 def build_exe():
     """使用 Nuitka 构建可执行文件"""
+    if not check_build_environment():
+        return
+
     try:
         # 清理旧文件
         clean_build()
         
         # Nuitka 打包命令
         cmd = [
-            "python", "-m", "nuitka",
+            sys.executable, "-m", "nuitka",
             "--windows-console-mode=disable",      # 禁用控制台
             "--windows-uac-admin",           # 请求管理员权限
             "--windows-icon-from-ico=src/resources/icon.ico",  # 设置图标
@@ -59,7 +80,7 @@ def build_exe():
         subprocess.run(cmd, check=True, env=env)
         
         print("\n构建成功！")
-        print("可执行文件位于: dist/桌面图标管理器.exe")
+        print(f"可执行文件位于: dist/桌面图标管理器v{APP_VERSION}.exe")
         
     except subprocess.CalledProcessError as e:
         print(f"构建失败: {e}")

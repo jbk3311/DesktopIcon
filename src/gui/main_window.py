@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ..core.icon_manager import IconManager
+from ..core.group_manager import GroupManager
 from .widgets import ScrollableIconFrame
+from .group_dialog import GroupDialog
 import os
 from ..utils.system_settings import SystemSettingsManager
 from src.utils.logger import get_logger
@@ -88,6 +90,8 @@ class DesktopIconManagerGUI:
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         
         self.icon_manager = IconManager()
+        self.group_manager = GroupManager()
+        self.current_icons = []
         self.create_widgets()
         self.refresh_icon_list()
 
@@ -193,6 +197,40 @@ class DesktopIconManagerGUI:
             command=self.show_help,
             width=15
         ).grid(row=0, column=3, padx=5)
+
+        group_frame = ttk.Frame(main_frame)
+        group_frame.pack(pady=(0, 10), fill=tk.X)
+
+        ttk.Label(group_frame, text="分组:").pack(side=tk.LEFT, padx=(0, 5))
+        self.group_var = tk.StringVar()
+        self.group_combo = ttk.Combobox(
+            group_frame,
+            textvariable=self.group_var,
+            state="readonly",
+            width=24,
+        )
+        self.group_combo.pack(side=tk.LEFT, padx=(0, 8))
+
+        ttk.Button(
+            group_frame,
+            text="选中分组",
+            command=self.select_group,
+            width=12,
+        ).pack(side=tk.LEFT, padx=(0, 5))
+
+        ttk.Button(
+            group_frame,
+            text="取消选中分组",
+            command=self.deselect_group,
+            width=14,
+        ).pack(side=tk.LEFT, padx=(0, 5))
+
+        ttk.Button(
+            group_frame,
+            text="管理分组",
+            command=self.manage_groups,
+            width=12,
+        ).pack(side=tk.LEFT)
         
         # 图标列表框架
         self.icon_frame = ScrollableIconFrame(main_frame)
@@ -241,7 +279,83 @@ class DesktopIconManagerGUI:
     
     def refresh_icon_list(self):
         icons = self.icon_manager.get_desktop_icons()
-        self.icon_frame.update_icons(icons)
+        self.current_icons = icons
+        valid_paths = [icon['path'] for icon in icons]
+        self.group_manager.prune_stale_assignments(valid_paths)
+        self._refresh_group_combo()
+        group_labels = self._build_group_labels(icons)
+        self.icon_frame.update_icons(icons, group_labels)
+
+    def _build_group_labels(self, icons):
+        labels = {}
+        for icon in icons:
+            group_id = self.group_manager.get_icon_group(icon['path'])
+            if group_id:
+                group_name = self.group_manager.get_group_name(group_id)
+                if group_name:
+                    labels[icon['path']] = group_name
+        return labels
+
+    def _refresh_group_combo(self):
+        options = []
+        self._group_option_map = {}
+
+        for group in self.group_manager.get_groups():
+            options.append(group['name'])
+            self._group_option_map[group['name']] = group['id']
+
+        options.append('未分组')
+        self._group_option_map['未分组'] = GroupManager.UNGROUPED_ID
+
+        self.group_combo['values'] = options
+        if options and self.group_var.get() not in options:
+            self.group_var.set(options[0])
+
+    def select_group(self):
+        selected_name = self.group_var.get()
+        if not selected_name:
+            messagebox.showinfo("提示", "请先选择分组")
+            return
+
+        group_id = self._group_option_map.get(selected_name)
+        valid_paths = [icon['path'] for icon in self.current_icons]
+
+        if group_id == GroupManager.UNGROUPED_ID:
+            paths = self.group_manager.get_ungrouped_icons(valid_paths)
+        else:
+            paths = self.group_manager.get_group_icons(group_id, valid_paths)
+
+        if not paths:
+            messagebox.showinfo("提示", "该分组暂无可用图标")
+            return
+
+        self.icon_frame.select_paths(paths)
+
+    def deselect_group(self):
+        selected_name = self.group_var.get()
+        if not selected_name:
+            messagebox.showinfo("提示", "请先选择分组")
+            return
+
+        group_id = self._group_option_map.get(selected_name)
+        valid_paths = [icon['path'] for icon in self.current_icons]
+
+        if group_id == GroupManager.UNGROUPED_ID:
+            paths = self.group_manager.get_ungrouped_icons(valid_paths)
+        else:
+            paths = self.group_manager.get_group_icons(group_id, valid_paths)
+
+        if not paths:
+            messagebox.showinfo("提示", "该分组暂无可用图标")
+            return
+
+        self.icon_frame.deselect_paths(paths)
+
+    def manage_groups(self):
+        dialog = GroupDialog(self.root, self.group_manager, self.current_icons)
+        dialog.show()
+        # 无论保存还是取消，都刷新一次确保 UI 与 group_manager 状态同步
+        self.refresh_icon_list()
     
     def show_help(self):
         """显示使用说明"""
@@ -251,13 +365,20 @@ class DesktopIconManagerGUI:
    - 隐藏选中：将选中的图标设为隐藏状态
    - 显示选中：将选中的图标恢复显示状态
    - 刷新列表：更新图标列表显示
+   - 选中分组：勾选当前分组内的图标（不影响其他已勾选项）
+   - 管理分组：创建分组并为图标分配归属
 
-2. 注意事项：
+2. 分组功能：
+   - 每个图标最多属于一个分组
+   - 分组配置保存在 icon_groups.json
+   - 先「选中分组」再「隐藏/显示选中」可快速批量操作
+
+3. 注意事项：
    - 需要管理员权限才能运行本程序
    - 修改后可能需要刷新才能看到效果
    - 建议定期备份重要文件
 
-3. 本程序已在github开源
+4. 本程序已在github开源
     - 欢迎访问提交issue
     - 开源地址：https://github.com/jbk3311/DesktopIcon
     - 如果觉得不错，给个star支持一下

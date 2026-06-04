@@ -8,6 +8,7 @@ class ScrollableIconFrame(ttk.LabelFrame):
         self.create_widgets()
         self.icon_checkboxes = {}
         self.all_var = None
+        self._selection_state = {}
     
     def create_widgets(self):
         # 创建滚动条和画布
@@ -50,8 +51,23 @@ class ScrollableIconFrame(ttk.LabelFrame):
     
     def on_canvas_configure(self, event):
         self.canvas.itemconfig(self.canvas_window, width=event.width)
+
+    def _build_label(self, icon, group_labels=None):
+        name = icon['name']
+        if not group_labels:
+            return name
+
+        group_name = group_labels.get(icon['path'])
+        if group_name:
+            return f"{name} [{group_name}]"
+        return name
     
-    def update_icons(self, icons):
+    def update_icons(self, icons, group_labels=None):
+        self._selection_state = {
+            path: data['variable'].get()
+            for path, data in self.icon_checkboxes.items()
+        }
+
         for widget in self.inner_frame.winfo_children():
             widget.destroy()
         
@@ -68,10 +84,10 @@ class ScrollableIconFrame(ttk.LabelFrame):
         
         # 图标复选框
         for icon in icons:
-            var = tk.BooleanVar()
+            var = tk.BooleanVar(value=self._selection_state.get(icon['path'], False))
             cb = ttk.Checkbutton(
                 self.inner_frame,
-                text=icon['name'],
+                text=self._build_label(icon, group_labels),
                 variable=var,
                 command=self.check_all_state
             )
@@ -80,6 +96,8 @@ class ScrollableIconFrame(ttk.LabelFrame):
                 'checkbox': cb,
                 'variable': var
             }
+
+        self.check_all_state()
     
     def toggle_all(self):
         state = self.all_var.get()
@@ -99,3 +117,26 @@ class ScrollableIconFrame(ttk.LabelFrame):
             path for path, data in self.icon_checkboxes.items()
             if data['variable'].get()
         ]
+
+    def select_paths(self, paths):
+        """累加勾选：将 paths 中的图标设为选中，不影响其他项"""
+        path_set = set(paths)
+        for path, data in self.icon_checkboxes.items():
+            if path in path_set:
+                data['variable'].set(True)
+        self.check_all_state()
+
+    def deselect_paths(self, paths):
+        """取消勾选 paths 中的图标，不影响其他项"""
+        path_set = set(paths)
+        for path, data in self.icon_checkboxes.items():
+            if path in path_set:
+                data['variable'].set(False)
+        self.check_all_state()
+
+    def set_selection(self, paths):
+        """精确设置勾选状态"""
+        path_set = set(paths)
+        for path, data in self.icon_checkboxes.items():
+            data['variable'].set(path in path_set)
+        self.check_all_state()

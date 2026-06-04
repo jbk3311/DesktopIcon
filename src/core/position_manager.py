@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import winreg
 import time
@@ -8,11 +9,14 @@ import win32com.client
 
 class IconPositionManager:
     def __init__(self):
-        # 使用程序目录存储配置文件
-        self.position_file = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-            'icon_positions.json'
-        )
+        # Nuitka --onefile 模式下 __file__ 指向临时解压目录，需用 sys.executable
+        if getattr(sys, 'frozen', False):
+            base = os.path.dirname(sys.executable)
+        else:
+            base = os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)
+            )))
+        self.position_file = os.path.join(base, 'icon_positions.json')
         self.load_positions()
     
     def load_positions(self):

@@ -1,0 +1,20 @@
+{
+  "groups": [
+    {
+      "id": "e5595778",
+      "name": "工作"
+    },
+    {
+      "id": "5e01e2ab",
+      "name": "众"
+    }
+  ],
+  "assignments": {
+    "C:\\Users\\jbk33\\Desktop\\CapCut.lnk": "5e01e2ab",
+    "C:\\Users\\jbk33\\Desktop\\CrazyPan.lnk": "5e01e2ab",
+    "C:\\Users\\jbk33\\Desktop\\Cursor.lnk": "5e01e2ab",
+    "C:\\Users\\jbk33\\Desktop\\desktop.ini": "5e01e2ab",
+    "C:\\Users\\Public\\Desktop\\desktop.ini": "5e01e2ab",
+    "C:\\Users\\jbk33\\Desktop\\Discord.lnk": "5e01e2ab"
+  }
+}

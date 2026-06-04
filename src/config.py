@@ -4,7 +4,7 @@
 
 # 软件信息
 APP_NAME = "桌面图标管理器"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 APP_AUTHOR = "meitool.cn"
 APP_COPYRIGHT = "Copyright (c) 2024"
 APP_DESCRIPTION = "一个用于管理Windows桌面图标的工具"
@@ -41,6 +41,17 @@ def get_icon_path():
 # 资源文件路径
 ICON_PATH = get_icon_path()
 LOG_PATH = os.path.join(os.getenv('APPDATA'), APP_NAME, 'logs')
+
+def get_project_root():
+    compiled = globals().get("__compiled__")
+    if compiled is not None:
+        return compiled.containing_dir
+
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+GROUPS_FILE = os.path.join(get_project_root(), 'icon_groups.json')
 
 # 应用设置
 DEFAULT_SETTINGS = {
